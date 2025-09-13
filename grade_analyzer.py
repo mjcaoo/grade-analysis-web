@@ -13,7 +13,7 @@ class GradeAnalyzer:
     def __init__(self):
         self.main_courses = []
     
-    def convert_grade_to_score(self, grade):
+    def convert_grade_to_score(self, grade, level):
         """
         转换成绩：
         若为0或无效成绩，返回0
@@ -25,16 +25,18 @@ class GradeAnalyzer:
         
         if isinstance(grade, str):
             grade = grade.strip()
+            level_grades = [[95, 85, 75, 65, 55], [90, 80, 70, 60, 50]]
+            level_id = 1 if level >= 2023 else 0
             if grade == '优秀':
-                return 95
+                return level_grades[level_id][0]
             elif grade == '良好':
-                return 85
+                return level_grades[level_id][1]
             elif grade == '中等':
-                return 75
+                return level_grades[level_id][2]
             elif grade == '及格':
-                return 65
+                return level_grades[level_id][3]
             elif grade == '不及格':
-                return 55
+                return level_grades[level_id][4]
             else:
                 # 尝试转换为数字
                 try:
@@ -122,6 +124,13 @@ class GradeAnalyzer:
                     print(f"错误：在文件 {file_path} 中找不到学号列")
                     continue
                 
+                # 查找年级列
+                level_col = None
+                for col in df.columns:
+                    if '年级' in str(col):
+                        level_col = col
+                        break
+
                 # 查找姓名列
                 student_name_col = None
                 for col in df.columns:
@@ -147,12 +156,16 @@ class GradeAnalyzer:
                     # 跳过无效的学号
                     if pd.isna(student_id):
                         continue
+
+                    level = row[level_col] if level_col and not pd.isna(row[level_col]) else '未知'
+                    level = int(str(level).strip())
                     
                     # 初始化学生数据
                     if student_id not in all_students_data:
                         student_name = row[student_name_col] if student_name_col and not pd.isna(row[student_name_col]) else f"学生{student_id}"
                         all_students_data[student_id] = {
                             'name': student_name,
+                            'level': level,
                             'courses': {}
                         }
                     
@@ -165,7 +178,7 @@ class GradeAnalyzer:
                             
                         # 获取成绩
                         grade = row[course_col]
-                        score = self.convert_grade_to_score(grade)
+                        score = self.convert_grade_to_score(grade, level)
                         
                         # 成绩为0或没有成绩说明该学生未学习该课程
                         if score > 0:
@@ -244,6 +257,7 @@ class GradeAnalyzer:
             results.append({
                 '学号': student_id,
                 '姓名': student_data['name'],
+                '年级': student_data['level'],
                 '修读课程数': course_count,
                 '总学分': total_credits,
                 '学分加权平均分': round(weighted_avg, 2),
@@ -258,3 +272,21 @@ class GradeAnalyzer:
             df_results = df_results.sort_values(by='学分加权平均分', ascending=False)
         
         return df_results
+    
+
+if __name__ == "__main__":
+    # 示例用法
+    data_dir = "data"
+    main_course_files = ["主要课程列表-计算机拔尖221.xlsx", "主要课程列表-数据科学231.xlsx"]
+    data_files = [["计算机（拔尖）221-1.xlsx", "计算机（拔尖）221-2.xlsx"],
+                  ["数据科学231-1.xlsx", "数据科学231-2.xlsx"]]
+    test_case = 0  # 选择测试用例索引
+    main_course_file = f"{data_dir}\\{main_course_files[test_case]}"
+    analyzer = GradeAnalyzer()
+    analyzer.load_main_courses(main_course_file)
+    data_files = [f"{data_dir}\\{f}" for f in data_files[test_case]]
+    combined_df = analyzer.process_combined_data(data_files)
+    # 保存Excel结果
+    result_path = f"{data_dir}\\成绩分析结果-{main_course_files[test_case]}.xlsx"
+    with pd.ExcelWriter(result_path, engine='openpyxl') as writer:
+        combined_df.to_excel(writer, sheet_name='综合成绩', index=False)
