@@ -3,15 +3,15 @@
 # @File    : app.py
 # @Time    : 2025/9/13
 
-from flask import Flask, render_template, request, jsonify, send_file, session, Blueprint
 import os
 import uuid
-from datetime import datetime
 import json
+import re
 import pandas as pd
-from grade_analyzer import GradeAnalyzer
-from werkzeug.utils import secure_filename
+from datetime import datetime
 from pytz import timezone
+from flask import Flask, render_template, request, jsonify, send_file, session, Blueprint
+from grade_analyzer import GradeAnalyzer
 
 # 创建Flask应用，支持子路径部署
 app = Flask(__name__)
@@ -45,10 +45,47 @@ app.wsgi_app = ProxyFix(app.wsgi_app)
 UPLOAD_FOLDER = 'uploads'
 RESULTS_FOLDER = 'results'
 ALLOWED_EXTENSIONS = {'xlsx', 'xls'}
+TIME_ZONE = timezone('Asia/Shanghai')
 
 # 确保上传和结果目录存在
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULTS_FOLDER, exist_ok=True)
+
+def safe_filename(filename):
+    """
+    安全化文件名，保留中文字符，并添加时间戳避免冲突
+    移除或替换不安全的字符，但保留中文、英文、数字和常见符号
+    """
+    if not filename:
+        return ''
+    
+    # 获取文件名和扩展名
+    name, ext = os.path.splitext(filename)
+    
+    # 移除或替换危险字符，但保留中文字符
+    # 允许的字符：中文、英文、数字、下划线、连字符、点、括号、空格
+    safe_name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', name)
+    
+    # 移除开头和结尾的点和空格
+    safe_name = safe_name.strip('. ')
+    
+    # 如果文件名为空，使用默认名称
+    if not safe_name:
+        safe_name = 'unnamed_file'
+    
+    # 添加时间戳避免文件名冲突
+    timestamp = datetime.now(TIME_ZONE).strftime('%Y%m%d_%H%M%S_%f')[:-3]  # 精确到毫秒
+    
+    # 限制文件名长度（考虑到中文字符和时间戳）
+    max_name_length = 180 - len(timestamp) - 1  # 为时间戳和下划线预留空间
+    if len(safe_name.encode('utf-8')) > max_name_length:
+        # 截断文件名，但确保不会在中文字符中间截断
+        safe_name = safe_name[:80]  # 保守截断
+    
+    # 组合文件名：原名_时间戳.扩展名
+    final_name = f"{safe_name}_{timestamp}{ext}"
+    
+    return final_name
 
 def allowed_file(filename):
     """检查文件扩展名是否允许"""
@@ -90,7 +127,7 @@ def upload_files():
         grade_files = request.files.getlist('grade_files')
         for file in grade_files:
             if file and file.filename and file.filename != '' and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
+                filename = safe_filename(file.filename)
                 file_path = os.path.join(session_upload_dir, filename)
                 file.save(file_path)
                 uploaded_files.append({
@@ -103,7 +140,7 @@ def upload_files():
         if not main_course_file.filename or not allowed_file(main_course_file.filename):
             return jsonify({'error': '主要课程列表文件格式不正确，请选择Excel文件'}), 400
             
-        filename = secure_filename(main_course_file.filename)
+        filename = safe_filename(main_course_file.filename)
         file_path = os.path.join(session_upload_dir, filename)
         main_course_file.save(file_path)
         uploaded_files.append({
@@ -169,8 +206,7 @@ def analyze():
             return jsonify({'error': '分析失败，没有有效的数据'}), 400
         
         # 生成结果文件
-        shanghai_tz = timezone('Asia/Shanghai')
-        timestamp = datetime.now(shanghai_tz).strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.now(TIME_ZONE).strftime('%Y%m%d_%H%M%S')
         result_filename = f'成绩分析结果_{timestamp}.xlsx'
         result_path = os.path.join(RESULTS_FOLDER, result_filename)
         
