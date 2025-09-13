@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成绩分析系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .file-upload-group {
+            margin-bottom: 25px;
+        }
+        
+        .file-upload-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-display {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: #666;
+        }
+        
+        .file-input-display:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .file-input-display.has-files {
+            border-color: #28a745;
+            background: #f8fff8;
+            color: #28a745;
+        }
+        
+        .selected-files {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .sample-section {
+            background: #f0f8ff !important;
+            border: 2px dashed #667eea !important;
+        }
+        
+        .sample-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .format-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(86, 171, 47, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .results-section {
+            display: none;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        
+        .results-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .results-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .results-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .results-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .footer h4 {
+            color: #ecf0f1;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .footer p {
+            color: #bdc3c7;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .footer .highlight {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .footer .version {
+            color: #95a5a6;
+            font-size: 0.9em;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #34495e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 成绩分析系统</h1>
+            <p>智能成绩分析，快速生成综合排名</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- 示例文件下载区域 -->
+            <div class="upload-section sample-section">
+                <h3>📄 示例文件下载</h3>
+                <p style="color: #555; margin-bottom: 20px;">首次使用？下载示例文件了解正确的文件格式</p>
+                <div class="sample-buttons">
+                    <a href="/zongce/sample/课程成绩-示例.xlsx" class="btn btn-primary" style="text-decoration: none;">
+                        📊 下载成绩文件示例
+                    </a>
+                    <a href="/zongce/sample/主要课程列表-示例.xlsx" class="btn btn-primary" style="text-decoration: none;">
+                        📋 下载主要课程列表示例
+                    </a>
+                </div>
+                <div class="format-info">
+                    <strong>📝 文件格式要求：</strong><br>
+                    • 成绩文件：需包含学号、姓名列，课程列格式为"课程名称【学分】"<br>
+                    • 主要课程列表：Excel文件，包含"主要课程"列
+                </div>
+            </div>
+            
+            <!-- 文件上传区域 -->
+            <div class="upload-section">
+                <h3>📂 文件上传</h3>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="file-upload-group">
+                        <label for="gradeFiles">成绩文件 (可选择多个Excel文件):</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="gradeFiles" name="grade_files" multiple accept=".xlsx,.xls">
+                            <div class="file-input-display" data-text="点击选择成绩文件...">
+                                点击选择成绩文件...
+                            </div>
+                        </div>
+                        <div id="gradeFilesDisplay" class="selected-files" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="file-upload-group">
+                        <label for="mainCourseFile">主要课程列表文件 (必需):</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="mainCourseFile" name="main_course_file" accept=".xlsx,.xls" required>
+                            <div class="file-input-display" data-text="点击选择主要课程列表文件...">
+                                点击选择主要课程列表文件...
+                            </div>
+                        </div>
+                        <div id="mainCourseFileDisplay" class="selected-files" style="display: none;"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="uploadBtn">
+                        📤 上传文件
+                    </button>
+                </form>
+            </div>
+            
+            <!-- 进度条 -->
+            <div id="progressSection" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div id="progressText" style="text-align: center; margin-top: 10px;">准备中...</div>
+            </div>
+            
+            <!-- 加载状态 -->
+            <div class="loading" id="loadingSection">
+                <div class="loading-spinner"></div>
+                <p>正在处理中，请稍候...</p>
+            </div>
+            
+            <!-- 分析按钮 -->
+            <div id="analyzeSection" style="display: none; text-align: center; margin: 30px 0;">
+                <button class="btn btn-success" id="analyzeBtn">
+                    🔍 开始分析
+                </button>
+            </div>
+            
+            <!-- 结果展示区域 -->
+            <div class="results-section" id="resultsSection">
+                <h3>📊 分析结果</h3>
+                
+                <div class="stats-grid" id="statsGrid">
+                    <!-- 统计信息将在这里动态生成 -->
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn btn-primary" id="downloadBtn">
+                        💾 下载完整结果
+                    </button>
+                </div>
+                
+                <div class="results-table">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>排名</th>
+                                <th>学号</th>
+                                <th>姓名</th>
+                                <th>修读课程数</th>
+                                <th>总学分</th>
+                                <th>学分加权平均分</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- 结果数据将在这里动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚信息 -->
+        <div class="footer">
+            <div class="footer-content">
+                <h4>🎓 成绩分析系统</h4>
+                <p>作者：<span class="highlight">mjcaoo</span> | 技术支持：<span class="highlight">Flask + Python</span></p>
+                <p>项目简介：基于Web的学生成绩分析与综合排名系统，支持多文件批量处理，自动生成学分加权平均分排名</p>
+                <p><strong>功能特色：</strong>多Excel文件上传 | 智能成绩解析 | 学分加权计算 | 可视化结果展示 | 一键导出报告</p>
+                <p><strong>使用声明：</strong>本系统仅用于教育管理和学术研究目的，请确保数据来源合法合规。系统不存储任何用户数据，所有文件处理完成后自动清理。</p>
+                <p><strong>技术说明：</strong>采用Flask框架开发，支持.xlsx/.xls格式文件，使用pandas进行数据处理，遵循数据安全与隐私保护原则。</p>
+                <div class="version">
+                    © 2025 成绩分析系统 | Version 1.0 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL前缀配置，支持子路径部署
+        const URL_PREFIX = '/zongce';
+        
+        let sessionId = null;
+        let analysisResults = null;
+        
+        // 添加点击事件到文件选择显示区域
+        document.addEventListener('DOMContentLoaded', function() {
+            // 成绩文件选择
+            const gradeFileDisplay = document.querySelector('[for="gradeFiles"]').nextElementSibling.querySelector('.file-input-display');
+            gradeFileDisplay.addEventListener('click', function() {
+                document.getElementById('gradeFiles').click();
+            });
+            
+            // 主要课程文件选择
+            const mainCourseFileDisplay = document.querySelector('[for="mainCourseFile"]').nextElementSibling.querySelector('.file-input-display');
+            mainCourseFileDisplay.addEventListener('click', function() {
+                document.getElementById('mainCourseFile').click();
+            });
+        });
+        
+        // 文件选择处理
+        document.getElementById('gradeFiles').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const display = document.getElementById('gradeFilesDisplay');
+            const inputDisplay = e.target.parentNode.querySelector('.file-input-display');
+            
+            if (files.length > 0) {
+                const fileNames = files.map(f => f.name).join(', ');
+                display.innerHTML = `已选择 ${files.length} 个文件: ${fileNames}`;
+                display.style.display = 'block';
+                inputDisplay.classList.add('has-files');
+                inputDisplay.textContent = `已选择 ${files.length} 个文件`;
+            } else {
+                display.style.display = 'none';
+                inputDisplay.classList.remove('has-files');
+                inputDisplay.textContent = '点击选择成绩文件...';
+            }
+        });
+        
+        document.getElementById('mainCourseFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const display = document.getElementById('mainCourseFileDisplay');
+            const inputDisplay = e.target.parentNode.querySelector('.file-input-display');
+            
+            if (file) {
+                display.innerHTML = `已选择: ${file.name}`;
+                display.style.display = 'block';
+                inputDisplay.classList.add('has-files');
+                inputDisplay.textContent = `已选择: ${file.name}`;
+            } else {
+                display.style.display = 'none';
+                inputDisplay.classList.remove('has-files');
+                inputDisplay.textContent = '点击选择主要课程列表文件...';
+            }
+        });
+        
+        // 文件上传
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressSection = document.getElementById('progressSection');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            // 检查是否选择了文件
+            const gradeFiles = document.getElementById('gradeFiles').files;
+            const mainCourseFile = document.getElementById('mainCourseFile').files[0];
+            
+            if (gradeFiles.length === 0) {
+                showAlert('请至少选择一个成绩文件！', 'error');
+                return;
+            }
+            
+            if (!mainCourseFile) {
+                showAlert('请选择主要课程列表文件！', 'error');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            progressSection.style.display = 'block';
+            
+            // 模拟进度
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `上传中... ${progress}%`;
+                if (progress >= 90) {
+                    clearInterval(progressInterval);
+                }
+            }, 100);
+            
+            try {
+                const response = await fetch(URL_PREFIX + '/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+                progressText.textContent = '上传完成！';
+                
+                if (response.ok) {
+                    sessionId = result.session_id;
+                    showAlert(`文件上传成功！已上传 ${result.files.length} 个文件`, 'success');
+                    document.getElementById('analyzeSection').style.display = 'block';
+                    setTimeout(() => {
+                        progressSection.style.display = 'none';
+                    }, 1000);
+                } else {
+                    showAlert(result.error || '上传失败', 'error');
+                    uploadBtn.disabled = false;
+                    progressSection.style.display = 'none';
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                showAlert('网络错误：' + error.message, 'error');
+                uploadBtn.disabled = false;
+                progressSection.style.display = 'none';
+            }
+        });
+        
+        // 分析按钮
+        document.getElementById('analyzeBtn').addEventListener('click', async function() {
+            if (!sessionId) {
+                showAlert('请先上传文件！', 'error');
+                return;
+            }
+            
+            const analyzeBtn = this;
+            const loadingSection = document.getElementById('loadingSection');
+            
+            analyzeBtn.disabled = true;
+            loadingSection.style.display = 'block';
+            
+            try {
+                const response = await fetch(URL_PREFIX + '/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    analysisResults = result;
+                    showResults(result);
+                    showAlert(`分析完成！共处理 ${result.student_count} 名学生的成绩`, 'success');
+                } else {
+                    showAlert(result.error || '分析失败', 'error');
+                    analyzeBtn.disabled = false;
+                }
+            } catch (error) {
+                showAlert('网络错误：' + error.message, 'error');
+                analyzeBtn.disabled = false;
+            } finally {
+                loadingSection.style.display = 'none';
+            }
+        });
+        
+        // 下载按钮
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            if (analysisResults && analysisResults.result_file) {
+                window.location.href = URL_PREFIX + '/download_result';
+            } else {
+                showAlert('没有可下载的结果文件', 'error');
+            }
+        });
+        
+        // 显示结果
+        function showResults(result) {
+            const resultsSection = document.getElementById('resultsSection');
+            const statsGrid = document.getElementById('statsGrid');
+            const tableBody = document.getElementById('resultsTableBody');
+            
+            // 显示统计信息
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${result.student_count}</div>
+                    <div class="stat-label">学生总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${result.preview.length > 0 ? result.preview[0]['修读课程数'] : 0}</div>
+                    <div class="stat-label">平均课程数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${result.preview.length > 0 ? result.preview[0]['学分加权平均分'] : 0}</div>
+                    <div class="stat-label">最高平均分</div>
+                </div>
+            `;
+            
+            // 显示结果表格
+            tableBody.innerHTML = '';
+            result.preview.forEach((student, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${student['学号']}</td>
+                    <td>${student['姓名']}</td>
+                    <td>${student['修读课程数']}</td>
+                    <td>${student['总学分']}</td>
+                    <td>${student['学分加权平均分']}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // 显示提示信息
+        function showAlert(message, type) {
+            // 移除已存在的提示
+            const existingAlert = document.querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            const mainContent = document.querySelector('.main-content');
+            mainContent.insertBefore(alert, mainContent.firstChild);
+            
+            // 提示信息不再自动移除，用户可手动关闭
+        }
+    </script>
+</body>
+</html>
