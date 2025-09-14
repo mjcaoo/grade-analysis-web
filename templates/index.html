@@ -32,6 +32,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
         
         .header h1 {
@@ -42,6 +43,27 @@
         .header p {
             font-size: 1.2em;
             opacity: 0.9;
+        }
+        
+        .header-github {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-github:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
         }
         
         .main-content {
@@ -338,11 +360,38 @@
             padding-top: 20px;
             border-top: 1px solid #34495e;
         }
+        
+        .github-link {
+            display: inline-block;
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .github-link:hover {
+            background: #4078c0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(64, 120, 192, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .github-icon {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <a href="https://github.com/mjcaoo/grade-analysis-web" target="_blank" class="header-github">
+                ⭐ GitHub
+            </a>
             <h1>🎓 成绩分析系统</h1>
             <p>智能成绩分析，快速生成综合排名</p>
         </div>
@@ -362,7 +411,7 @@
                 </div>
                 <div class="format-info">
                     <strong>📝 文件格式要求：</strong><br>
-                    • 成绩文件：需包含学号、姓名列，课程列格式为"课程名称【学分】"<br>
+                    • 成绩文件：需包含学号、姓名、年级列，课程列格式为"课程名称【学分】"<br>
                     • 主要课程列表：Excel文件，包含"主要课程"列
                 </div>
             </div>
@@ -463,8 +512,16 @@
                 <p><strong>功能特色：</strong>多Excel文件上传 | 智能成绩解析 | 学分加权计算 | 可视化结果展示 | 一键导出报告</p>
                 <p><strong>使用声明：</strong>本系统仅用于教育管理和学术研究目的，请确保数据来源合法合规。系统不存储任何用户数据，所有文件处理完成后自动清理。</p>
                 <p><strong>技术说明：</strong>采用Flask框架开发，支持.xlsx/.xls格式文件，使用pandas进行数据处理，遵循数据安全与隐私保护原则。</p>
+                
+                <!-- GitHub 开源链接 -->
+                <div style="margin: 20px 0;">
+                    <a href="https://github.com/mjcaoo/grade-analysis-web" target="_blank" class="github-link">
+                        <span class="github-icon">⭐</span>GitHub 开源项目
+                    </a>
+                </div>
+                
                 <div class="version">
-                    © 2025 成绩分析系统 | Version 1.0 
+                    © 2025 成绩分析系统 | Version 1.0 | <a href="https://github.com/mjcaoo/grade-analysis-web" target="_blank" style="color: #3498db; text-decoration: none;">开源地址</a>
                 </div>
             </div>
         </div>

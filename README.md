@@ -1,6 +1,16 @@
 # 成绩分析Web服务
 
+[![GitHub](https://img.shields.io/badge/GitHub-grade--analysis--web-blue?logo=github)](https://github.com/mjcaoo/grade-analysis-web)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.0+-red.svg)](https://flask.palletsprojects.com/)
+
 基于原有的 `grade_analysis_final.py` 成绩分析程序实现的简易Web服务，提供便捷的文件上传、在线分析和结果下载功能。
+
+## 🌟 在线体验
+
+- **项目地址**: [https://github.com/mjcaoo/grade-analysis-web](https://github.com/mjcaoo/grade-analysis-web)
+- **在线演示**: [点击体验](http://your-demo-url.com) (如有)
 
 ## 功能特性
 
